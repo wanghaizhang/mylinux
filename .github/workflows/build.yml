@@ -48,7 +48,7 @@ jobs:
       - name: Select defconfig
         run: |
           cd buildroot
-          make BR2_EXTERNAL=${{ github.workspace }}/mylinux \
+          make BR2_EXTERNAL=${{ github.workspace }} \
                O=build \
                ${{ env.BR_CONFIG }}
 
