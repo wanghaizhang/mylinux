@@ -4,8 +4,6 @@
 # Installed into the rootfs overlay at /etc/init.d/
 #
 
-. /etc/rc.func
-
 case "$1" in
   start)
     echo "Starting MyServerOS services..."

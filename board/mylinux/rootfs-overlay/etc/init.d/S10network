@@ -3,8 +3,6 @@
 # S10network - basic network bringup for MyServerOS (DHCP)
 #
 
-. /etc/rc.func
-
 case "$1" in
   start)
     echo "Bringing up network via DHCP..."
