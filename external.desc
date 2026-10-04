@@ -1,10 +1,2 @@
-# External tree description
-#
-# This file is read by Buildroot to register the external tree.
-# It must contain a single line per external project of the form:
-#
-#   EXTERNAL_<NAME>_NAME := <name>
-#   EXTERNAL_<NAME>_DESC := <description>
-#
-EXTERNAL_MYLINUX_NAME := mylinux
-EXTERNAL_MYLINUX_DESC := MyLinux custom embedded Linux server tree
+name: MYLINUX
+desc: MyLinux custom embedded Linux server tree

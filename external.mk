@@ -3,8 +3,7 @@
 # This file is included by Buildroot's top-level Makefile when the
 # external tree is enabled with BR2_EXTERNAL=.../mylinux.
 #
-# Add your package build rules here. For now the tree is empty of
-# custom packages, but the directory package/myserver exists for
-# future custom packages.
+# This globs every package/*.mk in the external tree, so any
+# package/ directory you add later is picked up automatically.
 #
-include package/myserver/*.mk
+include $(sort $(wildcard $(BR2_EXTERNAL_MYLINUX_PATH)/package/*/*.mk))

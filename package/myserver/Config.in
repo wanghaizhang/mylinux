@@ -1,0 +1,7 @@
+config BR2_PACKAGE_MYSERVER
+	bool "myserver"
+	help
+	  MyLinux example server application.
+
+	  A simple custom server used to verify
+	  the MyLinux Buildroot package system.

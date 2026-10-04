@@ -1,0 +1,5 @@
+menu "MyLinux"
+
+source "$BR2_EXTERNAL_MYLINUX_PATH/package/myserver/Config.in"
+
+endmenu
