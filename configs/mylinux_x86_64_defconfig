@@ -1,89 +1,64 @@
 #
 # MyLinux x86_64 defconfig (v0.1)
 #
-# Target architecture
+# Based on upstream Buildroot pc_x86_64_bios_defconfig (kernel 6.1.24,
+# glibc, GRUB2 BIOS boot, genimage disk image).
 #
-# Target options
-#
-BR2_x86_64=y
-BR2_x86_64_v1=y   # generic x86-64 baseline
-BR2_NATIVE_WORDSIZE=y
 
-#
-# Toolchain (Buildroot built-in, no download needed)
-#
+# Target architecture
+BR2_x86_64=y
+
+# Toolchain (Buildroot built-in, glibc, no download needed)
 BR2_TOOLCHAIN_BUILDROOT=y
-BR2_TOOLCHAIN_BUILDROOT_GCC_13=y
-BR2_TOOLCHAIN_BUILDROOT_GLIBC_2_38=y
-BR2_TOOLCHAIN_BUILDROOT_ZLIB=y
-BR2_TOOLCHAIN_BUILDROOT_OPENSSL=y
 BR2_TOOLCHAIN_BUILDROOT_CXX=y
 
-#
 # System configuration
-#
-BR2_SYSTEM_HOSTNAME="myserveros"
-BR2_SYSTEM_BANNER="MyServerOS v0.1"
-BR2_SYSTEM_DEFAULT_PATH="/usr/bin:/usr/sbin:/bin:/sbin"
-BR2_SYSTEM_BIN_SH="/bin/sh"
+BR2_TARGET_GENERIC_HOSTNAME="mylinux"
+BR2_TARGET_GENERIC_ISSUE="Welcome to MyLinux \nKernel \r on \m"
+BR2_TARGET_GENERIC_GETTY=y
+BR2_TARGET_GENERIC_GETTY_PORT="tty1"
+BR2_SYSTEM_DHCP="eth0"
 
-#
-# Init system: BusyBox init (no systemd)
-#
+# Init system
 BR2_INIT_BUSYBOX=y
 
-#
+# Device creation
+BR2_ROOTFS_DEVICE_CREATION_DYNAMIC_EUDEV=y
+
 # Kernel
-#
 BR2_LINUX_KERNEL=y
 BR2_LINUX_KERNEL_CUSTOM_VERSION=y
-BR2_LINUX_KERNEL_CUSTOM_VERSION_VALUE="6.12"
-BR2_LINUX_KERNEL_DEFCONFIG="generic"
-BR2_LINUX_KERNEL_ZIMAGE=y
-BR2_LINUX_KERNEL_APPEND_CONFIG_B=y
+BR2_LINUX_KERNEL_CUSTOM_VERSION_VALUE="6.1.24"
+BR2_LINUX_KERNEL_USE_CUSTOM_CONFIG=y
+BR2_LINUX_KERNEL_CUSTOM_CONFIG_FILE="board/mylinux/linux.config"
+BR2_LINUX_KERNEL_INSTALL_TARGET=y
+BR2_LINUX_KERNEL_NEEDS_HOST_OPENSSL=y
+BR2_LINUX_KERNEL_NEEDS_HOST_LIBELF=y
 
-#
-# Bootloaders
-#
-BR2_TARGET_GENERIC_REMAP=y
+# Kernel headers (must match kernel major version)
+BR2_PACKAGE_HOST_LINUX_HEADERS_CUSTOM_6_1=y
 
-#
-# Target packages
-#
-BR2_PACKAGE_BUSYBOX=y
-BR2_PACKAGE_BUSYBOX_CONFIG="board/mylinux/busybox.config"
-BR2_PACKAGE_BUSYBOX_SHOW_OTHERS=y
-BR2_PACKAGE_BUSYBOX_NETWORKING=y
-BR2_PACKAGE_BUSYBOX_FEATURE_FEATURE_NETWORKING_LONG_OPTIONS=y
-
-# Networking applications
-BR2_PACKAGE_DROPBEAR=y
-BR2_PACKAGE_DROPBEAR_ECC=y
-BR2_PACKAGE_DROPBEAR_REGULAR=y
-BR2_PACKAGE_DROPBEAR_CRYPT=y
-BR2_PACKAGE_DROPBEAR_SCP=y
-
-# Filesystem tools
-BR2_PACKAGE_E2FSPROCS=y
-BR2_PACKAGE_E2FSPROCS_MKFS=y
-BR2_PACKAGE_E2FSPROCS_RESIZE2FS=y
-
-# Coreutils / tar / gzip for rootfs
-BR2_PACKAGE_COREUTILS=y
-BR2_PACKAGE_TAR=y
-BR2_PACKAGE_GZIP=y
-BR2_PACKAGE_XZ=y
-
-#
 # Filesystem images
-#
-BR2_TARGET_ROOTFS_EXT4=y
-BR2_TARGET_ROOTFS_EXT4_2T=y
-BR2_TARGET_ROOTFS_EXT4_DEFAULT_SIZE=256M
+BR2_TARGET_ROOTFS_EXT2=y
+BR2_TARGET_ROOTFS_EXT2_4=y
+BR2_TARGET_ROOTFS_EXT2_SIZE="256M"
 BR2_TARGET_ROOTFS_TAR=y
-BR2_TARGET_ROOTFS_TAR_GZIP=y
 
-#
-# Board-specific overlay
-#
+# Bootloader
+BR2_TARGET_GRUB2=y
+BR2_TARGET_GRUB2_INSTALL_TOOLS=y
+
+# Host tools for disk image generation
+BR2_PACKAGE_HOST_GENIMAGE=y
+
+# Target packages
+BR2_PACKAGE_BUSYBOX=y
+BR2_PACKAGE_DROPBEAR=y
+
+# Root filesystem overlay
 BR2_ROOTFS_OVERLAY="board/mylinux/rootfs-overlay"
+
+# Post-build / post-image scripts
+BR2_ROOTFS_POST_BUILD_SCRIPT="board/mylinux/post-build.sh"
+BR2_ROOTFS_POST_IMAGE_SCRIPT="support/scripts/genimage.sh"
+BR2_ROOTFS_POST_SCRIPT_ARGS="-c board/mylinux/genimage-bios.cfg"
