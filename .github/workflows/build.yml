@@ -1,9 +1,6 @@
 name: Build MyServerOS
 
 on:
-  push:
-    branches: [main, master]
-  pull_request:
   workflow_dispatch:
 
 env:
@@ -59,11 +56,6 @@ jobs:
                O=build \
                -j"$(nproc)"
 
-      - name: Generate bootable disk image
-        run: |
-          cd buildroot/build
-          genimage -c ${{ github.workspace }}/board/mylinux/genimage.cfg
-
       - name: List build output
         run: |
           ls -lh buildroot/build/output/images/
@@ -71,14 +63,13 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: myserveros-x86_64
+          name: mylinux-x86_64
           path: |
             buildroot/build/output/images/*.img
             buildroot/build/output/images/*.tar
           if-no-files-found: error
 
       - name: Create GitHub Release
-        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v0.1
