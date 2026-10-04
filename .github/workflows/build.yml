@@ -42,8 +42,8 @@ jobs:
       - name: Configure external tree
         run: |
           cd buildroot
-          cp ${{ github.workspace }}/mylinux/external.desc ./external.desc
-          cp ${{ github.workspace }}/mylinux/external.mk ./external.mk
+          cp ${{ github.workspace }}/external.desc ./external.desc
+          cp ${{ github.workspace }}/external.mk ./external.mk
 
       - name: Select defconfig
         run: |
@@ -55,14 +55,14 @@ jobs:
       - name: Build
         run: |
           cd buildroot
-          make BR2_EXTERNAL=${{ github.workspace }}/mylinux \
+          make BR2_EXTERNAL=${{ github.workspace }} \
                O=build \
                -j"$(nproc)"
 
       - name: Generate bootable disk image
         run: |
           cd buildroot/build
-          genimage -c ${{ github.workspace }}/mylinux/board/mylinux/genimage.cfg
+          genimage -c ${{ github.workspace }}/board/mylinux/genimage.cfg
 
       - name: List build output
         run: |
