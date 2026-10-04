@@ -1,0 +1,89 @@
+name: Build MyServerOS
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+  workflow_dispatch:
+
+env:
+  BR_EXTERNAL_PATH: ${{ github.workspace }}/mylinux
+  BR_CONFIG: mylinux_x86_64_defconfig
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    name: Build MyServerOS x86_64
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential bc bison flex \
+            git wget curl \
+            zlib1g-dev libncurses-dev \
+            qemu-utils genimage \
+            ccache
+
+      - name: Checkout Buildroot
+        uses: actions/checkout@v4
+        with:
+          repository: buildroot/buildroot
+          path: buildroot
+          ref: 2025.02-rc1
+
+      - name: Configure external tree
+        run: |
+          cd buildroot
+          cp ${{ github.workspace }}/mylinux/external.desc ./external.desc
+          cp ${{ github.workspace }}/mylinux/external.mk ./external.mk
+
+      - name: Select defconfig
+        run: |
+          cd buildroot
+          make BR2_EXTERNAL=${{ github.workspace }}/mylinux \
+               O=build \
+               ${{ env.BR_CONFIG }}
+
+      - name: Build
+        run: |
+          cd buildroot
+          make BR2_EXTERNAL=${{ github.workspace }}/mylinux \
+               O=build \
+               -j"$(nproc)"
+
+      - name: Generate bootable disk image
+        run: |
+          cd buildroot/build
+          genimage -c ${{ github.workspace }}/mylinux/board/mylinux/genimage.cfg
+
+      - name: List build output
+        run: |
+          ls -lh buildroot/build/output/images/
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: myserveros-x86_64
+          path: |
+            buildroot/build/output/images/*.img
+            buildroot/build/output/images/*.tar
+          if-no-files-found: error
+
+      - name: Create GitHub Release
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v0.1
+          files: |
+            buildroot/build/output/images/*.img
+            buildroot/build/output/images/*.tar
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

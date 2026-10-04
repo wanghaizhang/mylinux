@@ -1,0 +1,5 @@
+# /etc/profile - shell environment for MyServerOS
+export PS1='\h:\w\$ '
+export PATH="/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/bin:/sbin"
+export HOME=/root
+export TERM=xterm
