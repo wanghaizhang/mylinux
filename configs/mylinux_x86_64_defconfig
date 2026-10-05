@@ -56,9 +56,9 @@ BR2_PACKAGE_BUSYBOX=y
 BR2_PACKAGE_DROPBEAR=y
 
 # Root filesystem overlay
-BR2_ROOTFS_OVERLAY="board/mylinux/rootfs-overlay"
+BR2_ROOTFS_OVERLAY="$(BR2_EXTERNAL_MYLINUX_PATH)/board/mylinux/rootfs-overlay"
 
 # Post-build / post-image scripts
-BR2_ROOTFS_POST_BUILD_SCRIPT="board/mylinux/post-build.sh"
+BR2_ROOTFS_POST_BUILD_SCRIPT="$(BR2_EXTERNAL_MYLINUX_PATH)/board/mylinux/post-build.sh"
 BR2_ROOTFS_POST_IMAGE_SCRIPT="support/scripts/genimage.sh"
-BR2_ROOTFS_POST_SCRIPT_ARGS="-c board/mylinux/genimage-bios.cfg"
+BR2_ROOTFS_POST_SCRIPT_ARGS="-c $(BR2_EXTERNAL_MYLINUX_PATH)/board/mylinux/genimage-bios.cfg"
