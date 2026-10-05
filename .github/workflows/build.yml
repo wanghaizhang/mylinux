@@ -61,23 +61,23 @@ jobs:
 
       - name: List build output
         run: |
-          ls -lh buildroot/build/output/images/
-
+          ls -lh buildroot/build/images/
+      
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: mylinux-x86_64
           path: |
-            buildroot/build/output/images/*.img
-            buildroot/build/output/images/*.tar
+            buildroot/build/images/*.img
+            buildroot/build/images/*.tar
           if-no-files-found: error
-
+      
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v0.1
           files: |
-            buildroot/build/output/images/*.img
-            buildroot/build/output/images/*.tar
+            buildroot/build/images/*.img
+            buildroot/build/images/*.tar
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
