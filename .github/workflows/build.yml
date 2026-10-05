@@ -18,9 +18,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        
+
       - name: Fix script permissions
-        run: chmod +x board/mylinux/post-build.sh
+        run: chmod +x ${{ github.workspace }}/board/mylinux/post-build.sh
   
       - name: Install build dependencies
         run: |
