@@ -60,7 +60,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.cache/ccache
-          key: ccache-${{ runner.os }}-${{ hashFiles('mylinux/**', 'buildroot/**') }}
+          key: ccache-${{ runner.os }}-${{ hashFiles('mylinux/**', 'buildroot/Config.in') }}
           restore-keys: |
             ccache-${{ runner.os }}-
 
@@ -108,7 +108,7 @@ jobs:
           ls -lh buildroot/build/images/
 
       # --------------------------------------------------
-      # 自动生成语义化版本
+      # 自动生成三段式版本
       #
       # v0.1.0
       # v0.1.1
