@@ -42,7 +42,7 @@ jobs:
           ref: 2025.02-rc1
 
       # --------------------------------------------------
-      # Buildroot ÏÂÔØÎÄ¼ş»º´æ
+      # Buildroot ä¸‹è½½æ–‡ä»¶ç¼“å­˜
       # --------------------------------------------------
       - name: Cache Buildroot downloads
         uses: actions/cache@v4
@@ -54,13 +54,13 @@ jobs:
             buildroot-dl-2025.02-rc1-
 
       # --------------------------------------------------
-      # ccache »º´æ
+      # ccache ç¼“å­˜
       # --------------------------------------------------
       - name: Cache ccache
         uses: actions/cache@v4
         with:
           path: ~/.cache/ccache
-          key: ccache-${{ runner.os }}-${{ hashFiles('mylinux/**', 'buildroot/**') }}
+          key: ccache-${{ runner.os }}-${{ hashFiles('mylinux/**', 'buildroot/Config.in') }}
           restore-keys: |
             ccache-${{ runner.os }}-
 
@@ -108,7 +108,7 @@ jobs:
           ls -lh buildroot/build/images/
 
       # --------------------------------------------------
-      # ×Ô¶¯Éú³ÉÈı¶ÎÊ½°æ±¾
+      # è‡ªåŠ¨ç”Ÿæˆä¸‰æ®µå¼ç‰ˆæœ¬
       #
       # v0.1.0
       # v0.1.1
