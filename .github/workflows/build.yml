@@ -18,10 +18,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Fix script permissions
         run: chmod +x ${{ github.workspace }}/board/mylinux/post-build.sh
-  
+
       - name: Install build dependencies
         run: |
           sudo apt-get update
@@ -39,15 +41,50 @@ jobs:
           path: buildroot
           ref: 2025.02-rc1
 
+      # --------------------------------------------------
+      # Buildroot 下载文件缓存
+      # --------------------------------------------------
+      - name: Cache Buildroot downloads
+        uses: actions/cache@v4
+        with:
+          path: buildroot/dl
+          key: buildroot-dl-2025.02-rc1-${{ runner.os }}-${{ hashFiles('buildroot/Config.in') }}
+          restore-keys: |
+            buildroot-dl-2025.02-rc1-${{ runner.os }}-
+            buildroot-dl-2025.02-rc1-
+
+      # --------------------------------------------------
+      # ccache 缓存
+      # --------------------------------------------------
+      - name: Cache ccache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ccache
+          key: ccache-${{ runner.os }}-${{ hashFiles('mylinux/**', 'buildroot/**') }}
+          restore-keys: |
+            ccache-${{ runner.os }}-
+
+      - name: Configure ccache
+        run: |
+          mkdir -p ~/.cache/ccache
+
+          ccache --set-config=cache_dir=$HOME/.cache/ccache
+          ccache --set-config=max_size=5G
+          ccache --zero-stats
+
+          ccache --show-config
+
       - name: Configure external tree
         run: |
           cd buildroot
+
           cp ${{ github.workspace }}/external.desc ./external.desc
           cp ${{ github.workspace }}/external.mk ./external.mk
 
       - name: Select defconfig
         run: |
           cd buildroot
+
           make BR2_EXTERNAL=${{ github.workspace }} \
                O=build \
                ${{ env.BR_CONFIG }}
@@ -55,14 +92,59 @@ jobs:
       - name: Build
         run: |
           cd buildroot
+
           make BR2_EXTERNAL=${{ github.workspace }} \
                O=build \
+               BR2_CCACHE=y \
+               BR2_CCACHE_DIR=$HOME/.cache/ccache \
                -j"$(nproc)"
+
+      - name: Show ccache statistics
+        run: |
+          ccache --show-stats
 
       - name: List build output
         run: |
           ls -lh buildroot/build/images/
-      
+
+      # --------------------------------------------------
+      # 自动生成三段式版本
+      #
+      # v0.1.0
+      # v0.1.1
+      # v0.1.2
+      # ...
+      # --------------------------------------------------
+      - name: Generate version tag
+        id: version
+        run: |
+          git fetch --tags --force
+
+          LAST_TAG=$(git tag -l 'v[0-9]*.[0-9]*.[0-9]*' \
+            --sort=-version:refname | head -n 1)
+
+          if [ -z "$LAST_TAG" ]; then
+            NEW_TAG="v0.1.0"
+          else
+            VERSION="${LAST_TAG#v}"
+
+            MAJOR=$(echo "$VERSION" | cut -d. -f1)
+            MINOR=$(echo "$VERSION" | cut -d. -f2)
+            PATCH=$(echo "$VERSION" | cut -d. -f3)
+
+            PATCH=$((PATCH + 1))
+
+            NEW_TAG="v${MAJOR}.${MINOR}.${PATCH}"
+          fi
+
+          echo "Last tag: ${LAST_TAG:-none}"
+          echo "New tag:  ${NEW_TAG}"
+
+          echo "new_tag=${NEW_TAG}" >> "$GITHUB_OUTPUT"
+
+      # --------------------------------------------------
+      # Actions Artifact
+      # --------------------------------------------------
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -71,11 +153,16 @@ jobs:
             buildroot/build/images/*.img
             buildroot/build/images/*.tar
           if-no-files-found: error
-      
+
+      # --------------------------------------------------
+      # GitHub Release
+      # --------------------------------------------------
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v0.1
+          tag_name: ${{ steps.version.outputs.new_tag }}
+          name: MyServerOS ${{ steps.version.outputs.new_tag }}
+          generate_release_notes: true
           files: |
             buildroot/build/images/*.img
             buildroot/build/images/*.tar
