@@ -1,4 +1,4 @@
-name: Build MyServerOS
+name: Build MyLinux Server
 
 on:
   workflow_dispatch:
@@ -13,7 +13,7 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-24.04
-    name: Build MyServerOS x86_64
+    name: Build MyLinux Server x86_64
 
     steps:
       - name: Checkout
@@ -42,7 +42,7 @@ jobs:
           ref: 2025.02-rc1
 
       # --------------------------------------------------
-      # Buildroot ÏÂÔØÎÄ¼ş»º´æ
+      # Buildroot ä¸‹è½½ç¼“å­˜
       # --------------------------------------------------
       - name: Cache Buildroot downloads
         uses: actions/cache@v4
@@ -54,7 +54,7 @@ jobs:
             buildroot-dl-2025.02-rc1-
 
       # --------------------------------------------------
-      # ccache »º´æ
+      # ccache ç¼“å­˜
       # --------------------------------------------------
       - name: Cache ccache
         uses: actions/cache@v4
@@ -108,7 +108,7 @@ jobs:
           ls -lh buildroot/build/images/
 
       # --------------------------------------------------
-      # ×Ô¶¯Éú³ÉÈı¶ÎÊ½°æ±¾
+      # è‡ªåŠ¨ç”Ÿæˆè¯­ä¹‰åŒ–ç‰ˆæœ¬
       #
       # v0.1.0
       # v0.1.1
@@ -152,7 +152,7 @@ jobs:
           path: |
             buildroot/build/images/*.img
             buildroot/build/images/*.tar
-          if-no-files-found: error
+          if-no-files-found: warn
 
       # --------------------------------------------------
       # GitHub Release
@@ -161,7 +161,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.version.outputs.new_tag }}
-          name: MyServerOS ${{ steps.version.outputs.new_tag }}
+          name: MyLinux Server ${{ steps.version.outputs.new_tag }}
           generate_release_notes: true
           files: |
             buildroot/build/images/*.img

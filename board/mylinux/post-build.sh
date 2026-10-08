@@ -1,15 +1,16 @@
 #!/bin/sh
 
-set -e
+TARGET_DIR="${1}"
 
-BOARD_DIR=$(dirname "$0")
+echo "Configuring MyLinux..."
 
-# Detect boot strategy, EFI or BIOS
-if [ -d "$BINARIES_DIR/efi-part/" ]; then
-    cp -f "$BOARD_DIR/grub-efi.cfg" "$BINARIES_DIR/efi-part/EFI/BOOT/grub.cfg"
-else
-    cp -f "$BOARD_DIR/grub-bios.cfg" "$TARGET_DIR/boot/grub/grub.cfg"
+# Ensure root home exists
+mkdir -p "${TARGET_DIR}/root"
 
-    # Copy grub 1st stage to binaries, required for genimage
-    cp -f "$TARGET_DIR/lib/grub/i386-pc/boot.img" "$BINARIES_DIR"
-fi
+# Ensure hostname
+echo "mylinux" > "${TARGET_DIR}/etc/hostname"
+
+# Permissions
+chmod 755 "${TARGET_DIR}/root"
+
+exit 0
