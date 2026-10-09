@@ -70,7 +70,7 @@ BR2_PACKAGE_HOST_LINUX_HEADERS_CUSTOM_6_1=y
 
 BR2_TARGET_ROOTFS_EXT2=y
 BR2_TARGET_ROOTFS_EXT2_4=y
-BR2_TARGET_ROOTFS_EXT2_SIZE="1G"
+BR2_TARGET_ROOTFS_EXT2_SIZE="8G"
 
 BR2_TARGET_ROOTFS_TAR=y
 
@@ -173,8 +173,8 @@ BR2_ROOTFS_OVERLAY="$(BR2_EXTERNAL_MYLINUX_PATH)/board/mylinux/rootfs-overlay"
 # Post build
 # ============================================================
 
-BR2_ROOTFS_POST_BUILD_SCRIPT="$(BR2_EXTERNAL_MYLINUX_PATH)/board/mylinux/post-build.sh"
-
+# BR2_ROOTFS_POST_BUILD_SCRIPT="$(BR2_EXTERNAL_MYLINUX_PATH)/board/mylinux/post-build.sh"
+BR2_ROOTFS_POST_BUILD_SCRIPT="$(BR2_EXTERNAL_MYLINUX_PATH)/board/mylinux/post-build.sh board/pc/post-build.sh"
 # ============================================================
 # Post image
 # ============================================================
