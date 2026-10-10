@@ -43,6 +43,7 @@ BR2_INIT_SYSTEMD=y
 # systemd needs /run
 BR2_ROOTFS_DEVICE_CREATION_DYNAMIC_EUDEV=y
 
+
 # ============================================================
 # Kernel
 # ============================================================
@@ -121,6 +122,11 @@ BR2_PACKAGE_ETHTOOL=y
 BR2_PACKAGE_BIND=y
 
 BR2_PACKAGE_CA_CERTIFICATES=y
+BR2_PACKAGE_NET_TOOLS=y
+
+# systemd network management
+BR2_PACKAGE_SYSTEMD_NETWORKD=y
+BR2_PACKAGE_SYSTEMD_RESOLVED=y
 
 # ============================================================
 # DHCP
@@ -132,6 +138,7 @@ BR2_PACKAGE_CA_CERTIFICATES=y
 # ============================================================
 
 BR2_PACKAGE_OPENSSH=y
+BR2_PACKAGE_OPENSSH_SERVER=y
 
 # ============================================================
 # Editors / utilities

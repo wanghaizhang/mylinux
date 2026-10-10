@@ -1,0 +1,14 @@
+[Unit]
+Description=OpenSSH server
+After=network.target
+
+[Service]
+Type=simple
+ExecStartPre=/usr/bin/ssh-keygen -A
+ExecStartPre=/usr/sbin/sshd -t
+ExecStart=/usr/sbin/sshd -D -e
+Restart=on-failure
+RestartSec=5s
+
+[Install]
+WantedBy=multi-user.target

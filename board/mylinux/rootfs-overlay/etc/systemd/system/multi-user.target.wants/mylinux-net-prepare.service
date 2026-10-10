@@ -1,0 +1,11 @@
+[Unit]
+Description=Prepare MyLinux network configuration
+Before=systemd-networkd.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/sbin/mylinux-net generate enp0s3
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,141 @@
+#!/bin/bash
+set -eu
+
+CONFIG_DIR=/etc/sysconfig/network-scripts
+NETWORK_DIR=/etc/systemd/network
+CONFIG_FILE=
+IFACE=
+
+usage() {
+    echo "Usage:"
+    echo "  mylinux-net status [IFACE]"
+    echo "  mylinux-net apply IFACE"
+    echo "  mylinux-net dhcp IFACE"
+    echo "  mylinux-net static IFACE CIDR GATEWAY DNS"
+    exit 2
+}
+
+get_value() {
+    local key="$1"
+    local file="$2"
+
+    sed -n \
+        "s/^[[:space:]]*${key}=[[:space:]]*[\"']\\{0,1\\}\\([^\"']*\\)[\"']\\{0,1\\}[[:space:]]*$/\\1/p" \
+        "$file" | tail -n 1
+}
+
+generate() {
+    local iface="$1"
+    local file="$CONFIG_DIR/ifcfg-$iface"
+    local device bootproto onboot ipaddr gateway dns1 dns2
+
+    [ -f "$file" ] || {
+        echo "配置文件不存在: $file" >&2
+        exit 1
+    }
+
+    device=$(get_value DEVICE "$file")
+    bootproto=$(get_value BOOTPROTO "$file")
+    onboot=$(get_value ONBOOT "$file")
+
+    [ -n "$device" ] || device="$iface"
+    [ "$device" = "$iface" ] || {
+        echo "DEVICE 与接口名不一致" >&2
+        exit 1
+    }
+
+    [ "${onboot:-yes}" != no ] || {
+        echo "$iface 已设置 ONBOOT=no"
+        return 0
+    }
+
+    mkdir -p "$NETWORK_DIR"
+
+    case "${bootproto:-dhcp}" in
+        dhcp|DHCP|bootp|BOOTPROTO)
+            cat > "$NETWORK_DIR/10-mylinux-managed.network" <<EOF
+[Match]
+Name=$iface
+
+[Network]
+DHCP=ipv4
+EOF
+            ;;
+        static|none|STATIC)
+            ipaddr=$(get_value IPADDR "$file")
+            gateway=$(get_value GATEWAY "$file")
+            dns1=$(get_value DNS1 "$file")
+            dns2=$(get_value DNS2 "$file")
+
+            [ -n "$ipaddr" ] || {
+                echo "静态 IP 缺少 IPADDR" >&2
+                exit 1
+            }
+
+            {
+                printf '[Match]\nName=%s\n\n[Network]\n' "$iface"
+                printf 'Address=%s\n' "$ipaddr"
+                [ -z "$gateway" ] || printf 'Gateway=%s\n' "$gateway"
+                [ -z "$dns1" ] || printf 'DNS=%s\n' "$dns1"
+                [ -z "$dns2" ] || printf 'DNS=%s\n' "$dns2"
+            } > "$NETWORK_DIR/10-mylinux-managed.network"
+            ;;
+        *)
+            echo "不支持的 BOOTPROTO: $bootproto" >&2
+            exit 1
+            ;;
+    esac
+}
+
+apply_config() {
+    local iface="$1"
+    generate "$iface"
+    systemctl restart systemd-networkd
+    networkctl status "$iface" --no-pager
+}
+
+case "${1:-}" in
+    status)
+        if [ -n "${2:-}" ]; then
+            networkctl status "$2" --no-pager
+        else
+            networkctl list
+        fi
+        ;;
+    apply)
+        [ "$#" -eq 2 ] || usage
+        apply_config "$2"
+        ;;
+    dhcp)
+        [ "$#" -eq 2 ] || usage
+        iface="$2"
+        mkdir -p "$CONFIG_DIR"
+        cat > "$CONFIG_DIR/ifcfg-$iface" <<EOF
+DEVICE=$iface
+ONBOOT=yes
+BOOTPROTO=dhcp
+EOF
+        apply_config "$iface"
+        ;;
+    static)
+        [ "$#" -eq 5 ] || usage
+        iface="$2"
+        mkdir -p "$CONFIG_DIR"
+        cat > "$CONFIG_DIR/ifcfg-$iface" <<EOF
+DEVICE=$iface
+ONBOOT=yes
+BOOTPROTO=static
+IPADDR=$3
+GATEWAY=$4
+DNS1=$5
+EOF
+        apply_config "$iface"
+        ;;
+    generate)
+        [ "$#" -eq 2 ] || usage
+        generate "$2"
+        ;;
+    *)
+        usage
+        ;;
+esac

@@ -23,7 +23,10 @@ jobs:
           fetch-depth: 0
 
       - name: Fix script permissions
-        run: chmod +x ${{ github.workspace }}/board/mylinux/post-build.sh
+        run: | 
+          chmod +x ${{ github.workspace }}/board/mylinux/post-build.sh
+          chmod +x ${{ github.workspace }}/board/mylinux/rootfs-overlay/usr/sbin/mylinux-net
+
 
       - name: Install build dependencies
         run: |
