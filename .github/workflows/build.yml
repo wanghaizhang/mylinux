@@ -110,7 +110,27 @@ jobs:
       - name: List build output
         run: |
           ls -lh buildroot/build/images/
+          
+      - name: Install Debian image build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            debootstrap \
+            parted \
+            e2fsprogs \
+            grub-pc-bin \
+            grub2-common
 
+      - name: Build Debian 13 root filesystem
+        run: |
+          chmod +x scripts/build-debian-rootfs.sh
+          sudo ./scripts/build-debian-rootfs.sh \
+            "$GITHUB_WORKSPACE/output/debian-rootfs"
+
+      - name: Build MyLinux disk image
+        run: |
+          chmod +x scripts/build-disk-image.sh
+          sudo ./scripts/build-disk-image.sh
       # --------------------------------------------------
       # 自动生成三段式版本
       #
