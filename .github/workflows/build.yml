@@ -153,9 +153,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: mylinux-x86_64
-          path: |
-            buildroot/build/images/*.img
-            buildroot/build/images/*.tar
+          path: buildroot/build/images/disk.img
           if-no-files-found: warn
 
       # --------------------------------------------------
@@ -168,7 +166,6 @@ jobs:
           name: MyLinux Server ${{ steps.version.outputs.new_tag }}
           generate_release_notes: true
           files: |
-            buildroot/build/images/*.img
-            buildroot/build/images/*.tar
+            path: buildroot/build/images/disk.img
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
